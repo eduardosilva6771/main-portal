@@ -24,6 +24,10 @@
   margin-top: 0;
 }
 
+.main-empty-canvas {
+  min-height: calc(100vh - 170px);
+}
+
 .balance-box {
   display: grid;
   gap: 0.1rem;

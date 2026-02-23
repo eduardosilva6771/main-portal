@@ -1,25 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import { PortalShell } from '@dudxtec/portal-ui'
+import { PortalShell, PortalTopUserActions } from '@dudxtec/portal-ui'
 import './App.css'
 
 const loginPortalUrl = import.meta.env.VITE_LOGIN_PORTAL_URL || 'http://localhost:5172/'
 const costCenterPortalUrl = import.meta.env.VITE_COST_CENTER_PORTAL_URL || 'http://localhost:5173/'
 const tenantPortalUrl = import.meta.env.VITE_TENANT_PORTAL_URL || 'http://localhost:5174/'
-const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN || 'dev-usvbyuppee5767fg.us.auth0.com'
-
-function normalizeAuth0Domain(domain) {
-  if (!domain) return 'https://dev-usvbyuppee5767fg.us.auth0.com'
-  if (domain.startsWith('http://') || domain.startsWith('https://')) return domain.replace(/\/+$/, '')
-  return `https://${domain.replace(/\/+$/, '')}`
-}
 
 function App() {
   const { isLoading, isAuthenticated, error, user, loginWithRedirect, logout } = useAuth0()
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef(null)
   const homeUrl = window.location.origin
-  const profileUrl = useMemo(() => `${normalizeAuth0Domain(auth0Domain)}/u/account`, [])
 
   const iconHome = (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -35,20 +24,9 @@ function App() {
   )
   const iconTenant = (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" />
-      <path d="M4 20a8 8 0 0 1 16 0" />
-    </svg>
-  )
-  const iconBell = (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M6 9a6 6 0 0 1 12 0v5l2 2H4l2-2z" />
-      <path d="M10 18a2 2 0 0 0 4 0" />
-    </svg>
-  )
-  const iconUser = (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" />
-      <path d="M4 20a8 8 0 0 1 16 0" />
+      <path d="M4 20V6h10v14" />
+      <path d="M14 20V10h6v10" />
+      <path d="M7 9h2M7 12h2M7 15h2M11 9h1M11 12h1M11 15h1M16 13h2M16 16h2" />
     </svg>
   )
 
@@ -63,16 +41,6 @@ function App() {
     { label: 'Cost Center', href: costCenterPortalUrl, icon: iconCostCenter },
     { label: 'Tenant', href: tenantPortalUrl, icon: iconTenant },
   ]
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (!menuRef.current) return
-      if (!menuRef.current.contains(event.target)) setMenuOpen(false)
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
 
   if (isLoading) {
     return (
@@ -121,77 +89,18 @@ function App() {
       brandTitle="Workspace"
       railItems={railItems}
       menuItems={menuItems}
-      topLeft={
-        <div className="balance-box">
-          <span>Ambiente autenticado</span>
-          <strong>{user?.email || user?.name || 'usuario'}</strong>
-        </div>
-      }
+      topLeft={<span>Portal principal</span>}
       topRight={
-        <div className="top-actions" ref={menuRef}>
-          <button className="icon-btn" type="button" title="Notificacoes">
-            {iconBell}
-          </button>
-          <button
-            className="icon-btn"
-            type="button"
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((prev) => !prev)}
-            title="Conta"
-          >
-            {iconUser}
-          </button>
-
-          {menuOpen && (
-            <div className="menu-dropdown" role="menu">
-              <p className="menu-user">{user?.email || user?.sub}</p>
-              <a className="dropdown-item" href={profileUrl} target="_blank" rel="noreferrer" role="menuitem">
-                Editar perfil (Auth0)
-              </a>
-              <button
-                type="button"
-                className="dropdown-item danger"
-                onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                role="menuitem"
-              >
-                Sair
-              </button>
-            </div>
-          )}
-        </div>
+        <PortalTopUserActions
+          subtitle="Ambiente autenticado"
+          userName={user?.email || user?.name || 'Usuario'}
+          logoutLabel="Sair"
+          onLogout={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+          logoutButtonClassName="ghost"
+        />
       }
     >
-      <section className="breadcrumb-bar">
-        <span>Portal</span>
-        <span className="divider">›</span>
-        <span>Modulos</span>
-      </section>
-
-      <section className="modules-card">
-        <div className="modules-header">
-          <h1>Modulos</h1>
-          <a className="btn ghost" href={loginPortalUrl}>Voltar ao Login</a>
-        </div>
-
-        <div className="module-list">
-          <article className="module-row">
-            <div>
-              <h2>Cost Center</h2>
-              <p>Gestao operacional de centros de custo e seus status.</p>
-            </div>
-            <a className="btn" href={costCenterPortalUrl}>Acessar</a>
-          </article>
-
-          <article className="module-row">
-            <div>
-              <h2>Tenant</h2>
-              <p>Gestao de tenants e parametros de identificacao.</p>
-            </div>
-            <a className="btn" href={tenantPortalUrl}>Acessar</a>
-          </article>
-        </div>
-      </section>
+      <section className="main-empty-canvas" aria-label="Area principal" />
     </PortalShell>
   )
 }
