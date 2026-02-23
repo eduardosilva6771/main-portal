@@ -1,5 +1,5 @@
 import { useAuth0 } from '@auth0/auth0-react'
-import { PortalShell, PortalTopUserActions } from '@dudxtec/portal-ui'
+import { PortalShell, PortalTopUserActions } from '@dudxtec/lib-portal-ui'
 import './App.css'
 
 const loginPortalUrl = import.meta.env.VITE_LOGIN_PORTAL_URL || 'http://localhost:5172/'
