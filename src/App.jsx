@@ -6,6 +6,7 @@ import './App.css'
 const loginPortalUrl = import.meta.env.VITE_LOGIN_PORTAL_URL || 'http://localhost:5172/'
 const costCenterPortalUrl = import.meta.env.VITE_COST_CENTER_PORTAL_URL || 'http://localhost:5173/'
 const tenantPortalUrl = import.meta.env.VITE_TENANT_PORTAL_URL || 'http://localhost:5174/'
+const coinPortalUrl = import.meta.env.VITE_COIN_PORTAL_URL || 'http://localhost:5175/'
 
 function App() {
   const { isLoading, isAuthenticated, error, user, logout } = useAuth0()
@@ -38,17 +39,25 @@ function App() {
       <path d="M7 9h2M7 12h2M7 15h2M11 9h1M11 12h1M11 15h1M16 13h2M16 16h2" />
     </svg>
   )
+  const iconCoin = (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
 
   const railItems = [
     { label: 'Inicio', href: homeUrl, icon: iconHome, active: true },
     { label: 'Cost Center', href: costCenterPortalUrl, icon: iconCostCenter },
     { label: 'Tenant', href: tenantPortalUrl, icon: iconTenant },
+    { label: 'Coin', href: coinPortalUrl, icon: iconCoin },
   ]
 
   const menuItems = [
     { label: 'Inicio', href: homeUrl, icon: iconHome, active: true },
     { label: 'Cost Center', href: costCenterPortalUrl, icon: iconCostCenter },
     { label: 'Tenant', href: tenantPortalUrl, icon: iconTenant },
+    { label: 'Coin', href: coinPortalUrl, icon: iconCoin },
   ]
 
   if (isLoading) {
