@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { PortalShell, PortalTopUserActions } from '@dudxtec/lib-portal-ui'
 import './App.css'
@@ -7,8 +8,16 @@ const costCenterPortalUrl = import.meta.env.VITE_COST_CENTER_PORTAL_URL || 'http
 const tenantPortalUrl = import.meta.env.VITE_TENANT_PORTAL_URL || 'http://localhost:5174/'
 
 function App() {
-  const { isLoading, isAuthenticated, error, user, loginWithRedirect, logout } = useAuth0()
+  const { isLoading, isAuthenticated, error, user, logout } = useAuth0()
   const homeUrl = window.location.origin
+  const loginRedirectUrl = loginPortalUrl.replace(/\/$/, '')
+  const redirectStartedRef = useRef(false)
+
+  useEffect(() => {
+    if (isLoading || isAuthenticated || redirectStartedRef.current) return
+    redirectStartedRef.current = true
+    window.location.assign(loginPortalUrl)
+  }, [isLoading, isAuthenticated])
 
   const iconHome = (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -44,42 +53,19 @@ function App() {
 
   if (isLoading) {
     return (
-      <PortalShell
-        brandKicker="Main Portal"
-        brandTitle="Workspace"
-        railItems={railItems}
-        menuItems={menuItems}
-        topLeft={<span>Aguardando autenticacao...</span>}
-        topRight={<span>Nao autenticado</span>}
-      >
-        <section className="login-card">Carregando sessao...</section>
-      </PortalShell>
+      <main className="main-auth-gate">
+        <section className="login-card" aria-hidden="true" />
+      </main>
     )
   }
 
   if (!isAuthenticated) {
     return (
-      <PortalShell
-        brandKicker="Main Portal"
-        brandTitle="Workspace"
-        railItems={railItems}
-        menuItems={menuItems}
-        topLeft={<span>Ambiente nao autenticado</span>}
-        topRight={<span>Convidado</span>}
-      >
+      <main className="main-auth-gate">
         <section className="login-card">
-          <p className="kicker">MAIN PORTAL</p>
-          <h1>Painel principal</h1>
-          <p>Autentique-se para acessar os modulos do ecossistema.</p>
-          <div className="actions">
-            <button type="button" onClick={() => loginWithRedirect()}>
-              Entrar com Auth0
-            </button>
-            <a className="btn ghost" href={loginPortalUrl}>Ir para Login Portal</a>
-          </div>
           {error && <p className="error">{error.message}</p>}
         </section>
-      </PortalShell>
+      </main>
     )
   }
 
@@ -95,7 +81,7 @@ function App() {
           subtitle="Ambiente autenticado"
           userName={user?.email || user?.name || 'Usuario'}
           logoutLabel="Sair"
-          onLogout={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+          onLogout={() => logout({ logoutParams: { returnTo: loginRedirectUrl } })}
           logoutButtonClassName="ghost"
         />
       }
