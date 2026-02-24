@@ -50,14 +50,14 @@ function App() {
     { label: 'Inicio', href: homeUrl, icon: iconHome, active: true },
     { label: 'Cost Center', href: costCenterPortalUrl, icon: iconCostCenter },
     { label: 'Tenant', href: tenantPortalUrl, icon: iconTenant },
-    { label: 'Coin', href: coinPortalUrl, icon: iconCoin },
+    { label: 'Payment Method', href: coinPortalUrl, icon: iconCoin },
   ]
 
   const menuItems = [
     { label: 'Inicio', href: homeUrl, icon: iconHome, active: true },
     { label: 'Cost Center', href: costCenterPortalUrl, icon: iconCostCenter },
     { label: 'Tenant', href: tenantPortalUrl, icon: iconTenant },
-    { label: 'Coin', href: coinPortalUrl, icon: iconCoin },
+    { label: 'Payment Method', href: coinPortalUrl, icon: iconCoin },
   ]
 
   if (isLoading) {
@@ -82,6 +82,7 @@ function App() {
     <PortalShell
       brandKicker="Main Portal"
       brandTitle="Workspace"
+      exclusiveNavigation
       railItems={railItems}
       menuItems={menuItems}
       topLeft={<span>Portal principal</span>}
