@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import { PortalShell, PortalTopUserActions } from '@dudxtec/lib-portal-ui'
+import { PortalShell, PortalTopUserActions, portalIconPaymentMethod } from '@dudxtec/lib-portal-ui'
 import './App.css'
 
 const loginPortalUrl = import.meta.env.VITE_LOGIN_PORTAL_URL || 'http://localhost:5172/'
@@ -39,12 +39,7 @@ function App() {
       <path d="M7 9h2M7 12h2M7 15h2M11 9h1M11 12h1M11 15h1M16 13h2M16 16h2" />
     </svg>
   )
-  const iconCoin = (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="8" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  )
+  const iconCoin = portalIconPaymentMethod
 
   const railItems = [
     { label: 'Inicio', href: homeUrl, icon: iconHome, active: true },
