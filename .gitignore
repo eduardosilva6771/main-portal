@@ -1,16 +1,12 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Flutter build outputs
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
 
-node_modules
-dist
-dist-ssr
-*.local
+# Flutter web
+web/icons/
 
 # Editor directories and files
 .vscode/*
