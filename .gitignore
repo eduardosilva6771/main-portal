@@ -1,20 +1,12 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
-migrate_working_dir/
+# Flutter build outputs
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
+# Flutter web
+web/icons/
 
 # Visual Studio Code related
 .vscode/
