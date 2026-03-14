@@ -294,7 +294,7 @@ class _PortalShell extends StatelessWidget {
             const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Text(
                   'dudxtec',
                   style: TextStyle(
