@@ -4,31 +4,47 @@ Portal principal pos-login para navegacao entre modulos (`cost-center-portal` e 
 
 ## Requisitos
 
-- Node.js 24.x
+- Flutter SDK 3.19+
+- Dart SDK 3.3+
 - Aplicacao Auth0 SPA configurada
 
 ## Setup
 
-```sh
-npm install
-```
-
 Crie `.env` com base no `.env.example`.
+
+```sh
+flutter pub get
+```
 
 ## Executar
 
 ```sh
-npm run dev
+flutter run -d chrome
 ```
 
 O portal sobe em `http://localhost:5171`.
 
+Para especificar a porta:
+
+```sh
+flutter run -d web-server --web-port 5171
+```
+
+## Build
+
+```sh
+flutter build web
+```
+
 ## Variaveis de ambiente
 
-- `VITE_AUTH0_DOMAIN`
-- `VITE_AUTH0_CLIENT_ID`
-- `VITE_AUTH0_AUDIENCE`
-- `VITE_AUTH0_REDIRECT_URI`
-- `VITE_LOGIN_PORTAL_URL`
-- `VITE_COST_CENTER_PORTAL_URL`
-- `VITE_TENANT_PORTAL_URL`
+O arquivo `.env` deve conter:
+
+- `AUTH0_DOMAIN`
+- `AUTH0_CLIENT_ID`
+- `AUTH0_AUDIENCE`
+- `AUTH0_LOGIN_PORTAL_URL`
+- `COST_CENTER_PORTAL_URL`
+- `TENANT_PORTAL_URL`
+- `ENTRY_TYPE_PORTAL_URL`
+- `PAYMENT_METHOD_PORTAL_URL`

@@ -1,0 +1,12 @@
+{
+    "name": "main-portal",
+    "short_name": "main-portal",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#f4f7fb",
+    "theme_color": "#0f4ab4",
+    "description": "Portal principal pós-login para navegação entre módulos.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": []
+}
