@@ -1,3 +1,6 @@
+// This file is web-only; dart:html and auth0_flutter_web are web-specific.
+import 'dart:html' as html;
+
 import 'package:flutter/material.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:auth0_flutter/auth0_flutter_web.dart';
@@ -65,12 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _redirectToLogin() async {
-    final uri = Uri.parse(AppConfig.loginPortalUrl);
-    if (!await launchUrl(uri)) {
-      setState(() {
-        _error = 'Nao foi possivel redirecionar para o portal de login.';
-      });
-    }
+    html.window.location.assign(AppConfig.loginPortalUrl);
   }
 
   Future<void> _logout() async {
