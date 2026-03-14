@@ -168,6 +168,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
 // ─── Loading Gate ─────────────────────────────────────────────────────────────
 
+// ── Loading state ──────────────────────────────────────────────────────────
+
 class _LoadingGate extends StatelessWidget {
   const _LoadingGate();
 
@@ -828,3 +830,4 @@ class _ModuleCardState extends State<_ModuleCard> {
     );
   }
 }
+
