@@ -10,7 +10,7 @@ class App extends StatelessWidget {
       title: 'Main Portal',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F4AB4)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF007172)),
         fontFamily: 'Space Grotesk',
         useMaterial3: true,
       ),
