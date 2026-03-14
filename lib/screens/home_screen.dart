@@ -20,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   String? _error;
   int _selectedIndex = 0;
+  bool _authRedirectStarted = false;
 
   static const List<_NavItem> _navItems = [
     _NavItem(label: 'Inicio', icon: Icons.home_outlined, selectedIcon: Icons.home),
@@ -60,18 +61,29 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       if (_user == null) {
-        await _redirectToLogin();
+        await _startLogin();
       }
     } catch (e) {
       setState(() {
         _error = e.toString();
         _isLoading = false;
       });
-      await _redirectToLogin();
+      await _redirectToLoginPortal();
     }
   }
 
-  Future<void> _redirectToLogin() async {
+  Future<void> _startLogin() async {
+    if (_authRedirectStarted) return;
+    _authRedirectStarted = true;
+
+    final redirectUrl = '${Uri.base.origin}/';
+    await _auth0.loginWithRedirect(
+      redirectUrl: redirectUrl,
+      audience: AppConfig.auth0Audience,
+    );
+  }
+
+  Future<void> _redirectToLoginPortal() async {
     await launchUrl(
       Uri.parse(AppConfig.loginPortalUrl),
       webOnlyWindowName: '_self',
