@@ -50,6 +50,30 @@ flutter build web \
 
 O build gerado estara em `build/web/`.
 
+## Deploy no Railway
+
+O Railway nao detecta Flutter Web automaticamente via Railpack. Este repositorio agora inclui um `Dockerfile` para:
+
+- buildar o app com `flutter build web`
+- embutir os valores de `--dart-define` no build
+- servir `build/web` via Nginx
+
+### Configuracao
+
+1. No serviço do Railway, use este repositorio com o `Dockerfile` na raiz.
+2. Configure as variaveis do serviço:
+   - `AUTH0_DOMAIN`
+   - `AUTH0_CLIENT_ID`
+   - `AUTH0_AUDIENCE`
+   - `LOGIN_PORTAL_URL`
+   - `COST_CENTER_PORTAL_URL`
+   - `TENANT_PORTAL_URL`
+   - `ENTRY_TYPE_PORTAL_URL`
+   - `PAYMENT_METHOD_PORTAL_URL`
+3. Faça um novo deploy.
+
+Observacao: em Flutter Web, esses valores sao resolvidos no build. Alterar variaveis no Railway exige novo deploy para refletir no frontend.
+
 ## Variaveis de ambiente (--dart-define)
 
 - `AUTH0_DOMAIN`

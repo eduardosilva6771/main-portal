@@ -1,0 +1,13 @@
+.dart_tool/
+.git/
+.github/
+.idea/
+build/
+.env
+.env.*
+!.env.example
+README.md
+AGENTS.md
+CHANGELOG.md
+doc/
+test/
