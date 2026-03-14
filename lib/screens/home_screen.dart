@@ -7,19 +7,22 @@ import 'package:url_launcher/url_launcher.dart';
 import '../config/app_config.dart';
 
 // ── Palette ────────────────────────────────────────────────────────────────
-const _kPrimary = Color(0xFF1A237E);
-const _kPrimaryLight = Color(0xFF3949AB);
-const _kBackground = Color(0xFFF0F2F8);
+const _kPrimary = Color(0xFF007172);
+const _kPrimaryLight = Color(0xFF009A9B);
+const _kAccent = Color(0xFFFF9100);
+const _kBackground = Color(0xFFF0F5F5);
 const _kSurface = Colors.white;
-const _kBorder = Color(0xFFDDE3F0);
-const _kTextDark = Color(0xFF1C2340);
-const _kTextLight = Color(0xFF8892B0);
+const _kBorder = Color(0xFFDDE8E8);
+const _kTextDark = Color(0xFF1C3535);
+const _kTextLight = Color(0xFF6B8A8A);
 const _kDanger = Color(0xFFB71C1C);
 const _kDangerLight = Color(0xFFFFEBEE);
+const _kSidebarBg = Color(0xFF004748);
 
 // ── Responsive breakpoints ─────────────────────────────────────────────────
 const _kBreakpointLarge = 900.0;
-const _kBreakpointMedium = 600.0;
+const _kGridBreakpointWide = 800.0;
+const _kGridBreakpointMedium = 480.0;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -42,28 +45,28 @@ class _HomeScreenState extends State<HomeScreen> {
       label: 'Centro de Custo',
       description: 'Gerencie centros de custo e alocações financeiras.',
       icon: Icons.account_balance_rounded,
-      color: Color(0xFF1565C0),
+      color: Color(0xFF007172),
       urlIndex: 0,
     ),
     _ModuleCard(
       label: 'Inquilinos',
       description: 'Cadastro e gestão de inquilinos e contratos.',
       icon: Icons.people_alt_rounded,
-      color: Color(0xFF00695C),
+      color: Color(0xFFFF9100),
       urlIndex: 1,
     ),
     _ModuleCard(
       label: 'Tipos de Lançamento',
       description: 'Configure categorias e tipos de lançamentos contábeis.',
       icon: Icons.category_rounded,
-      color: Color(0xFF6A1B9A),
+      color: Color(0xFF004748),
       urlIndex: 2,
     ),
     _ModuleCard(
       label: 'Formas de Pagamento',
       description: 'Administre formas e métodos de pagamento aceitos.',
       icon: Icons.payment_rounded,
-      color: Color(0xFFC62828),
+      color: Color(0xFFE65100),
       urlIndex: 3,
     ),
   ];
@@ -242,43 +245,89 @@ class _PortalShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width >= _kBreakpointLarge;
+
     return Scaffold(
       backgroundColor: _kBackground,
-      appBar: _buildAppBar(context),
-      body: SingleChildScrollView(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _WelcomeBanner(user: user),
-                  const SizedBox(height: 36),
-                  const _SectionTitle(
-                    icon: Icons.apps_rounded,
-                    title: 'Módulos disponíveis',
-                    subtitle: 'Acesse os portais do ecossistema dudxtec',
+      appBar: _buildAppBar(context, showDrawerButton: !isWide),
+      drawer: isWide
+          ? null
+          : Drawer(
+              width: 240,
+              child: _SidebarContent(
+                modules: modules,
+                onModuleOpen: onModuleOpen,
+                onLogout: onLogout,
+              ),
+            ),
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (isWide)
+            SizedBox(
+              width: 240,
+              child: _SidebarContent(
+                modules: modules,
+                onModuleOpen: onModuleOpen,
+                onLogout: onLogout,
+              ),
+            ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 960),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 32,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _WelcomeBanner(user: user),
+                        const SizedBox(height: 36),
+                        const _SectionTitle(
+                          icon: Icons.apps_rounded,
+                          title: 'Módulos disponíveis',
+                          subtitle: 'Acesse os portais do ecossistema dudxtec',
+                        ),
+                        const SizedBox(height: 20),
+                        _ModulesGrid(modules: modules, onOpen: onModuleOpen),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 20),
-                  _ModulesGrid(modules: modules, onOpen: onModuleOpen),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context, {
+    required bool showDrawerButton,
+  }) {
     return AppBar(
       backgroundColor: _kPrimary,
       elevation: 0,
       titleSpacing: 0,
+      automaticallyImplyLeading: false,
+      leading: showDrawerButton
+          ? Builder(
+              builder: (ctx) => IconButton(
+                icon: const Icon(Icons.menu_rounded, color: Colors.white),
+                onPressed: () => Scaffold.of(ctx).openDrawer(),
+              ),
+            )
+          : null,
       title: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.only(
+          left: showDrawerButton ? 4 : 20,
+          right: 20,
+        ),
         child: Row(
           children: [
             Container(
@@ -294,7 +343,7 @@ class _PortalShell extends StatelessWidget {
             const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Text(
                   'dudxtec',
                   style: TextStyle(
@@ -318,6 +367,190 @@ class _PortalShell extends StatelessWidget {
             const Spacer(),
             _UserMenu(user: user, onLogout: onLogout),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Sidebar ────────────────────────────────────────────────────────────────
+
+class _SidebarContent extends StatelessWidget {
+  final List<_ModuleCard> modules;
+  final ValueChanged<int> onModuleOpen;
+  final VoidCallback onLogout;
+
+  const _SidebarContent({
+    required this.modules,
+    required this.onModuleOpen,
+    required this.onLogout,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: _kSidebarBg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Brand header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: _kAccent.withValues(alpha: 0.20),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.hub_rounded,
+                    color: _kAccent,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'DUDXTEC',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 2.0,
+                        color: _kAccent,
+                      ),
+                    ),
+                    Text(
+                      'Main Portal',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Divider(color: Colors.white.withValues(alpha: 0.10), height: 1),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 6),
+            child: Text(
+              'MÓDULOS',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+                color: Colors.white.withValues(alpha: 0.40),
+              ),
+            ),
+          ),
+          ...modules.map(
+            (m) => _SidebarItem(
+              icon: m.icon,
+              label: m.label,
+              onTap: () => onModuleOpen(m.urlIndex),
+            ),
+          ),
+          const Spacer(),
+          Divider(color: Colors.white.withValues(alpha: 0.10), height: 1),
+          _SidebarItem(
+            icon: Icons.logout_rounded,
+            label: 'Sair',
+            onTap: onLogout,
+            isDestructive: true,
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Sidebar item ───────────────────────────────────────────────────────────
+
+class _SidebarItem extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  const _SidebarItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  @override
+  State<_SidebarItem> createState() => _SidebarItemState();
+}
+
+class _SidebarItemState extends State<_SidebarItem> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final baseColor = widget.isDestructive ? _kDanger : Colors.white;
+    final hoverBg = widget.isDestructive
+        ? _kDanger.withValues(alpha: 0.15)
+        : _kAccent.withValues(alpha: 0.12);
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(
+          color: _hovered ? hoverBg : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: _hovered && !widget.isDestructive
+                ? _kAccent.withValues(alpha: 0.30)
+                : Colors.transparent,
+          ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.onTap,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  Icon(
+                    widget.icon,
+                    size: 18,
+                    color: _hovered && !widget.isDestructive
+                        ? _kAccent
+                        : baseColor.withValues(alpha: 0.75),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    widget.label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: _hovered && !widget.isDestructive
+                          ? Colors.white
+                          : baseColor.withValues(alpha: 0.85),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -379,15 +612,21 @@ class _WelcomeBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: _kAccent.withValues(alpha: 0.20),
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: _kAccent.withValues(alpha: 0.40),
+                    ),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.verified_rounded, size: 14, color: Colors.white),
+                      Icon(Icons.verified_rounded, size: 14, color: _kAccent),
                       SizedBox(width: 6),
                       Text(
                         'Sessão autenticada',
@@ -404,8 +643,12 @@ class _WelcomeBanner extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
+              color: _kAccent.withValues(alpha: 0.15),
               shape: BoxShape.circle,
+              border: Border.all(
+                color: _kAccent.withValues(alpha: 0.30),
+                width: 2,
+              ),
             ),
             child: const Icon(Icons.person_rounded, size: 42, color: Colors.white),
           ),
@@ -435,7 +678,7 @@ class _SectionTitle extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: _kPrimary.withValues(alpha: 0.08),
+            color: _kPrimary.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: _kPrimary, size: 20),
@@ -476,12 +719,11 @@ class _ModulesGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final columns = width > _kBreakpointLarge ? 4 : width > _kBreakpointMedium ? 2 : 1;
-
     return LayoutBuilder(
       builder: (context, constraints) {
-        final cardWidth = (constraints.maxWidth - (columns - 1) * 16) / columns;
+        final w = constraints.maxWidth;
+        final columns = w > _kGridBreakpointWide ? 4 : w > _kGridBreakpointMedium ? 2 : 1;
+        final cardWidth = (w - (columns - 1) * 16) / columns;
         return Wrap(
           spacing: 16,
           runSpacing: 16,
@@ -527,7 +769,7 @@ class _ModuleTileState extends State<_ModuleTile> {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: _hovered
-                ? widget.card.color.withValues(alpha: 0.4)
+                ? widget.card.color.withValues(alpha: 0.40)
                 : _kBorder,
           ),
           boxShadow: [
@@ -648,7 +890,7 @@ class _UserMenuState extends State<_UserMenu> {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor: Colors.white.withValues(alpha: 0.20),
+                  backgroundColor: _kAccent.withValues(alpha: 0.25),
                   child: Text(
                     _initials,
                     style: const TextStyle(
@@ -775,4 +1017,3 @@ class _UserMenuState extends State<_UserMenu> {
     );
   }
 }
-
