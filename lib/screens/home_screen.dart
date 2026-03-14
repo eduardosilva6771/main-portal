@@ -1,3 +1,5 @@
+// This file is web-only; auth0_flutter_web is web-specific.
+
 import 'package:flutter/material.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:auth0_flutter/auth0_flutter_web.dart';
@@ -43,11 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _handleCallback() async {
     try {
-      await _auth0.onLoad(
+      final credentials = await _auth0.onLoad(
         audience: AppConfig.auth0Audience,
-        redirectUrl: Uri.base.origin,
       );
-      final credentials = await _auth0.credentials;
       setState(() {
         _user = credentials?.user;
         _isLoading = false;
@@ -65,12 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _redirectToLogin() async {
-    final uri = Uri.parse(AppConfig.loginPortalUrl);
-    if (!await launchUrl(uri)) {
-      setState(() {
-        _error = 'Nao foi possivel redirecionar para o portal de login.';
-      });
-    }
+    await launchUrl(
+      Uri.parse(AppConfig.loginPortalUrl),
+      webOnlyWindowName: '_self',
+    );
   }
 
   Future<void> _logout() async {
@@ -328,9 +326,9 @@ class _UserMenuState extends State<_UserMenu> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
+                    const Text(
                       'Ambiente autenticado',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         color: Color(0xFF8A96AE),
                       ),
