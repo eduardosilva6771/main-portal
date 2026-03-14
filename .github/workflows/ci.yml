@@ -1,0 +1,47 @@
+name: CI — Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Flutter Web Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Build web
+        run: |
+          flutter build web \
+            --dart-define=AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }} \
+            --dart-define=AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }} \
+            --dart-define=AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }} \
+            --dart-define=LOGIN_PORTAL_URL=${{ secrets.LOGIN_PORTAL_URL }} \
+            --dart-define=COST_CENTER_PORTAL_URL=${{ secrets.COST_CENTER_PORTAL_URL }} \
+            --dart-define=TENANT_PORTAL_URL=${{ secrets.TENANT_PORTAL_URL }} \
+            --dart-define=ENTRY_TYPE_PORTAL_URL=${{ secrets.ENTRY_TYPE_PORTAL_URL }} \
+            --dart-define=PAYMENT_METHOD_PORTAL_URL=${{ secrets.PAYMENT_METHOD_PORTAL_URL }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web/
+          retention-days: 7
