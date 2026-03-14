@@ -45,13 +45,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _handleCallback() async {
     try {
-      final credentials = await _auth0.onLoad(
-        audience: AppConfig.auth0Audience,
-      );
+      await _auth0.onLoad();
+      final hasValidCredentials = await _auth0.hasValidCredentials();
+
+      UserProfile? user;
+      if (hasValidCredentials) {
+        final credentials = await _auth0.credentials();
+        user = credentials.user;
+      }
+
       setState(() {
-        _user = credentials?.user;
+        _user = user;
         _isLoading = false;
       });
+
       if (_user == null) {
         await _redirectToLogin();
       }
