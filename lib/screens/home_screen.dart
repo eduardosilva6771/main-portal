@@ -6,6 +6,74 @@ import 'package:auth0_flutter/auth0_flutter_web.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config/app_config.dart';
 
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+
+const _kPrimary = Color(0xFF1A56DB);
+const _kSidebarBg = Color(0xFF0F172A);
+const _kBackground = Color(0xFFF1F5F9);
+const _kSurface = Color(0xFFFFFFFF);
+const _kBorder = Color(0xFFE2E8F0);
+const _kText = Color(0xFF0F172A);
+const _kTextMuted = Color(0xFF64748B);
+const _kSidebarText = Color(0xFF94A3B8);
+const _kSidebarTextActive = Color(0xFFFFFFFF);
+const _kSidebarActiveBg = Color(0xFF1E293B);
+const _kSidebarWidth = 240.0;
+
+// ─── Module data ─────────────────────────────────────────────────────────────
+
+class _Module {
+  final String label;
+  final String description;
+  final IconData icon;
+  final Color color;
+  final String url;
+
+  const _Module({
+    required this.label,
+    required this.description,
+    required this.icon,
+    required this.color,
+    required this.url,
+  });
+
+  Color colorWithOpacity(double opacity) =>
+      Color.fromRGBO(color.red, color.green, color.blue, opacity);
+}
+
+const List<_Module> _kModules = [
+  _Module(
+    label: 'Centro de Custo',
+    description: 'Gerencie centros de custo e alocações orçamentárias',
+    icon: Icons.account_balance_outlined,
+    color: Color(0xFF2563EB),
+    url: AppConfig.costCenterPortalUrl,
+  ),
+  _Module(
+    label: 'Inquilinos',
+    description: 'Cadastro e gestão de inquilinos do sistema',
+    icon: Icons.people_outline,
+    color: Color(0xFF7C3AED),
+    url: AppConfig.tenantPortalUrl,
+  ),
+  _Module(
+    label: 'Tipos de Lançamento',
+    description: 'Configure categorias de lançamentos contábeis',
+    icon: Icons.category_outlined,
+    color: Color(0xFF059669),
+    url: AppConfig.entryTypePortalUrl,
+  ),
+  _Module(
+    label: 'Formas de Pagamento',
+    description: 'Gerencie métodos e condições de pagamento',
+    icon: Icons.payment_outlined,
+    color: Color(0xFFD97706),
+    url: AppConfig.paymentMethodPortalUrl,
+  ),
+];
+
+// ─── HomeScreen ───────────────────────────────────────────────────────────────
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -14,29 +82,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final Auth0Web _auth0 = Auth0Web(AppConfig.auth0Domain, AppConfig.auth0ClientId);
+  final Auth0Web _auth0 =
+      Auth0Web(AppConfig.auth0Domain, AppConfig.auth0ClientId);
 
   UserProfile? _user;
   bool _isLoading = true;
   String? _error;
-  int _selectedIndex = 0;
   bool _authRedirectStarted = false;
-
-  static const List<_NavItem> _navItems = [
-    _NavItem(label: 'Inicio', icon: Icons.home_outlined, selectedIcon: Icons.home),
-    _NavItem(label: 'Centro de Custo', icon: Icons.account_balance_outlined, selectedIcon: Icons.account_balance),
-    _NavItem(label: 'Inquilinos', icon: Icons.people_outline, selectedIcon: Icons.people),
-    _NavItem(label: 'Tipos de Lancamento', icon: Icons.category_outlined, selectedIcon: Icons.category),
-    _NavItem(label: 'Formas de Pagamento', icon: Icons.payment_outlined, selectedIcon: Icons.payment),
-  ];
-
-  static const List<String> _moduleUrls = [
-    '',
-    AppConfig.costCenterPortalUrl,
-    AppConfig.tenantPortalUrl,
-    AppConfig.entryTypePortalUrl,
-    AppConfig.paymentMethodPortalUrl,
-  ];
 
   @override
   void initState() {
@@ -91,13 +143,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _logout() async {
-    final returnTo = AppConfig.loginPortalUrl.replaceAll(RegExp(r'/$'), '');
+    final returnTo =
+        AppConfig.loginPortalUrl.replaceAll(RegExp(r'/$'), '');
     await _auth0.logout(returnToUrl: returnTo);
   }
 
-  Future<void> _openModule(int index) async {
-    if (index == 0) return;
-    final url = _moduleUrls[index];
+  Future<void> _openModule(String url) async {
     if (url.isNotEmpty) {
       await launchUrl(Uri.parse(url));
     }
@@ -105,41 +156,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const _LoadingGate();
-    }
-
-    if (_user == null) {
-      return _ErrorGate(error: _error);
-    }
-
+    if (_isLoading) return const _LoadingGate();
+    if (_user == null) return _ErrorGate(error: _error);
     return _PortalShell(
       user: _user!,
-      selectedIndex: _selectedIndex,
-      navItems: _navItems,
-      onNavSelected: (index) {
-        if (index == 0) {
-          setState(() => _selectedIndex = 0);
-        } else {
-          _openModule(index);
-        }
-      },
+      onModuleOpen: _openModule,
       onLogout: _logout,
     );
   }
 }
 
-class _NavItem {
-  final String label;
-  final IconData icon;
-  final IconData selectedIcon;
-
-  const _NavItem({
-    required this.label,
-    required this.icon,
-    required this.selectedIcon,
-  });
-}
+// ─── Loading Gate ─────────────────────────────────────────────────────────────
 
 class _LoadingGate extends StatelessWidget {
   const _LoadingGate();
@@ -147,20 +174,32 @@ class _LoadingGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Color(0xFFF4F7FB),
+      backgroundColor: _kBackground,
       body: Center(
-        child: SizedBox(
-          width: 48,
-          height: 48,
-          child: CircularProgressIndicator(
-            color: Color(0xFF0F4AB4),
-            strokeWidth: 3,
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 44,
+              height: 44,
+              child: CircularProgressIndicator(
+                color: _kPrimary,
+                strokeWidth: 3,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Carregando...',
+              style: TextStyle(color: _kTextMuted, fontSize: 14),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+// ─── Error Gate ───────────────────────────────────────────────────────────────
 
 class _ErrorGate extends StatelessWidget {
   final String? error;
@@ -170,14 +209,34 @@ class _ErrorGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FB),
+      backgroundColor: _kBackground,
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 760),
+          constraints: const BoxConstraints(maxWidth: 480),
           child: error != null
-              ? Text(
-                  error!,
-                  style: const TextStyle(color: Color(0xFF952424)),
+              ? Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFFECACA)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Color(0xFFDC2626),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          error!,
+                          style:
+                              const TextStyle(color: Color(0xFF991B1B)),
+                        ),
+                      ),
+                    ],
+                  ),
                 )
               : const SizedBox.shrink(),
         ),
@@ -186,91 +245,62 @@ class _ErrorGate extends StatelessWidget {
   }
 }
 
+// ─── Portal Shell ─────────────────────────────────────────────────────────────
+
 class _PortalShell extends StatelessWidget {
   final UserProfile user;
-  final int selectedIndex;
-  final List<_NavItem> navItems;
-  final ValueChanged<int> onNavSelected;
+  final ValueChanged<String> onModuleOpen;
   final VoidCallback onLogout;
 
   const _PortalShell({
     required this.user,
-    required this.selectedIndex,
-    required this.navItems,
-    required this.onNavSelected,
+    required this.onModuleOpen,
     required this.onLogout,
   });
+
+  String get _displayName => user.name ?? user.email ?? 'Usuário';
+
+  String get _greeting {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Bom dia';
+    if (hour < 18) return 'Boa tarde';
+    return 'Boa noite';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F1EC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        titleSpacing: 0,
-        title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'MAIN PORTAL',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.5,
-                      color: Colors.brown.shade700,
-                    ),
-                  ),
-                  const Text(
-                    'Workspace',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF23190F),
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              const Text(
-                'Portal principal',
-                style: TextStyle(fontSize: 14, color: Color(0xFF586781)),
-              ),
-              const SizedBox(width: 16),
-              _UserMenu(user: user, onLogout: onLogout),
-            ],
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: const Color(0xFFD8E0EC)),
-        ),
-      ),
+      backgroundColor: _kBackground,
       body: Row(
         children: [
-          NavigationRail(
-            backgroundColor: Colors.white,
-            selectedIndex: selectedIndex,
-            onDestinationSelected: onNavSelected,
-            labelType: NavigationRailLabelType.all,
-            destinations: navItems
-                .map(
-                  (item) => NavigationRailDestination(
-                    icon: Icon(item.icon),
-                    selectedIcon: Icon(item.selectedIcon),
-                    label: Text(item.label),
-                  ),
-                )
-                .toList(),
+          _Sidebar(
+            displayName: _displayName,
+            onModuleOpen: onModuleOpen,
+            onLogout: onLogout,
           ),
-          Container(width: 1, color: const Color(0xFFD8E0EC)),
-          const Expanded(
-            child: SizedBox.expand(),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const _TopBar(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _WelcomeHero(
+                          greeting: _greeting,
+                          displayName: _displayName,
+                        ),
+                        const SizedBox(height: 40),
+                        _ModuleGrid(onModuleOpen: onModuleOpen),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -278,100 +308,523 @@ class _PortalShell extends StatelessWidget {
   }
 }
 
-class _UserMenu extends StatefulWidget {
-  final UserProfile user;
+// ─── Sidebar ─────────────────────────────────────────────────────────────────
+
+class _Sidebar extends StatelessWidget {
+  final String displayName;
+  final ValueChanged<String> onModuleOpen;
   final VoidCallback onLogout;
 
-  const _UserMenu({required this.user, required this.onLogout});
-
-  @override
-  State<_UserMenu> createState() => _UserMenuState();
-}
-
-class _UserMenuState extends State<_UserMenu> {
-  bool _open = false;
-
-  String get _displayName =>
-      widget.user.email ?? widget.user.name ?? 'Usuário';
+  const _Sidebar({
+    required this.displayName,
+    required this.onModuleOpen,
+    required this.onLogout,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Color(0xFFD8E0EC)),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    return Container(
+      width: _kSidebarWidth,
+      color: _kSidebarBg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const _SidebarBrand(),
+          const SizedBox(height: 8),
+          const _SidebarNavItem(
+            icon: Icons.home_outlined,
+            label: 'Início',
+            selected: true,
           ),
-          onPressed: () => setState(() => _open = !_open),
+          const SizedBox(height: 16),
+          const _SidebarSectionLabel(title: 'MÓDULOS'),
+          const SizedBox(height: 4),
+          ..._kModules.map(
+            (m) => _SidebarNavItem(
+              icon: m.icon,
+              label: m.label,
+              onTap: () => onModuleOpen(m.url),
+            ),
+          ),
+          const Spacer(),
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            color: const Color(0xFF1E293B),
+          ),
+          _SidebarUser(displayName: displayName, onLogout: onLogout),
+        ],
+      ),
+    );
+  }
+}
+
+class _SidebarBrand extends StatelessWidget {
+  const _SidebarBrand();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 64,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: _kPrimary,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.hub_outlined,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'dudxtec',
+              style: TextStyle(
+                color: _kSidebarTextActive,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarSectionLabel extends StatelessWidget {
+  final String title;
+
+  const _SidebarSectionLabel({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: Color(0xFF475569),
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarNavItem extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  const _SidebarNavItem({
+    required this.icon,
+    required this.label,
+    this.selected = false,
+    this.onTap,
+  });
+
+  @override
+  State<_SidebarNavItem> createState() => _SidebarNavItemState();
+}
+
+class _SidebarNavItemState extends State<_SidebarNavItem> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final showActive = widget.selected || _hovered;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: widget.onTap != null
+          ? SystemMouseCursors.click
+          : MouseCursor.defer,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          decoration: BoxDecoration(
+            color: widget.selected
+                ? _kSidebarActiveBg
+                : _hovered
+                    ? _kSidebarActiveBg
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.person_outline, size: 18, color: Color(0xFF3B4D68)),
-              const SizedBox(width: 6),
+              Icon(
+                widget.icon,
+                size: 18,
+                color:
+                    showActive ? _kSidebarTextActive : _kSidebarText,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  widget.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: showActive
+                        ? _kSidebarTextActive
+                        : _kSidebarText,
+                    fontSize: 14,
+                    fontWeight: widget.selected
+                        ? FontWeight.w600
+                        : FontWeight.w400,
+                  ),
+                ),
+              ),
+              if (widget.onTap != null)
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 150),
+                  opacity: _hovered ? 1.0 : 0.0,
+                  child: const Icon(
+                    Icons.open_in_new,
+                    size: 13,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarUser extends StatelessWidget {
+  final String displayName;
+  final VoidCallback onLogout;
+
+  const _SidebarUser({
+    required this.displayName,
+    required this.onLogout,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: _kPrimary,
+                  child: Text(
+                    displayName.isNotEmpty
+                        ? displayName[0].toUpperCase()
+                        : 'U',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: _kSidebarTextActive,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const Text(
+                        'Autenticado',
+                        style: TextStyle(
+                          color: Color(0xFF64748B),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          _SidebarNavItem(
+            icon: Icons.logout,
+            label: 'Sair',
+            onTap: onLogout,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Top Bar ─────────────────────────────────────────────────────────────────
+
+class _TopBar extends StatelessWidget {
+  const _TopBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 56,
+      decoration: const BoxDecoration(
+        color: _kSurface,
+        border: Border(bottom: BorderSide(color: _kBorder)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: const Row(
+        children: [
+          Text(
+            'Dashboard',
+            style: TextStyle(
+              color: _kText,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Welcome Hero ─────────────────────────────────────────────────────────────
+
+class _WelcomeHero extends StatelessWidget {
+  final String greeting;
+  final String displayName;
+
+  const _WelcomeHero({
+    required this.greeting,
+    required this.displayName,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1A56DB), Color(0xFF1340A0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$greeting,',
+                  style: const TextStyle(
+                    color: Color(0xB3FFFFFF),
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  displayName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Selecione um módulo abaixo para começar.',
+                  style: TextStyle(
+                    color: Color(0x99FFFFFF),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: const Color(0x26FFFFFF),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.dashboard_outlined,
+              color: Colors.white,
+              size: 30,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Module Grid ─────────────────────────────────────────────────────────────
+
+class _ModuleGrid extends StatelessWidget {
+  final ValueChanged<String> onModuleOpen;
+
+  const _ModuleGrid({required this.onModuleOpen});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Módulos do Sistema',
+          style: TextStyle(
+            color: _kText,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Acesse os módulos disponíveis na sua conta',
+          style: TextStyle(color: _kTextMuted, fontSize: 14),
+        ),
+        const SizedBox(height: 20),
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: _kModules
+              .map((m) => _ModuleCard(module: m, onOpen: onModuleOpen))
+              .toList(),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Module Card ─────────────────────────────────────────────────────────────
+
+class _ModuleCard extends StatefulWidget {
+  final _Module module;
+  final ValueChanged<String> onOpen;
+
+  const _ModuleCard({required this.module, required this.onOpen});
+
+  @override
+  State<_ModuleCard> createState() => _ModuleCardState();
+}
+
+class _ModuleCardState extends State<_ModuleCard> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final m = widget.module;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => widget.onOpen(m.url),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          width: 240,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: _kSurface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: _hovered ? m.colorWithOpacity(0.45) : _kBorder,
+              width: 1.5,
+            ),
+            boxShadow: _hovered
+                ? [
+                    BoxShadow(
+                      color: m.colorWithOpacity(0.14),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : [
+                    const BoxShadow(
+                      color: Color(0x0D000000),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: m.colorWithOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(m.icon, color: m.color, size: 22),
+              ),
+              const SizedBox(height: 14),
               Text(
-                _displayName,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF3B4D68)),
+                m.label,
+                style: const TextStyle(
+                  color: _kText,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                m.description,
+                style: const TextStyle(
+                  color: _kTextMuted,
+                  fontSize: 13,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Text(
+                    'Acessar módulo',
+                    style: TextStyle(
+                      color: m.color,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.arrow_forward, color: m.color, size: 14),
+                ],
               ),
             ],
           ),
         ),
-        if (_open)
-          Positioned(
-            right: 0,
-            top: 38,
-            child: Material(
-              elevation: 8,
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                width: 260,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: const Color(0xFFD8E0EC)),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _displayName,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF5A6881),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Ambiente autenticado',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF8A96AE),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFFEBC5C5)),
-                        backgroundColor: const Color(0xFFFFF5F5),
-                        foregroundColor: const Color(0xFF8A2E2E),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                        minimumSize: const Size.fromHeight(36),
-                      ),
-                      onPressed: widget.onLogout,
-                      child: const Text('Sair'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-      ],
+      ),
     );
   }
 }
