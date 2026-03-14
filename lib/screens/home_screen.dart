@@ -17,6 +17,10 @@ const _kTextLight = Color(0xFF8892B0);
 const _kDanger = Color(0xFFB71C1C);
 const _kDangerLight = Color(0xFFFFEBEE);
 
+// ── Responsive breakpoints ─────────────────────────────────────────────────
+const _kBreakpointLarge = 900.0;
+const _kBreakpointMedium = 600.0;
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -296,7 +300,7 @@ class _PortalShell extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: 2,
+                    letterSpacing: 1.5,
                     color: Colors.white70,
                   ),
                 ),
@@ -358,7 +362,7 @@ class _WelcomeBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Bem-vindo, $_firstName! 👋',
+                  'Bem-vindo, $_firstName!',
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
@@ -473,7 +477,7 @@ class _ModulesGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final columns = width > 900 ? 4 : width > 600 ? 2 : 1;
+    final columns = width > _kBreakpointLarge ? 4 : width > _kBreakpointMedium ? 2 : 1;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -516,79 +520,86 @@ class _ModuleTileState extends State<_ModuleTile> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: widget.onOpen,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: _kSurface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: _hovered
-                  ? widget.card.color.withValues(alpha: 0.4)
-                  : _kBorder,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: _hovered
-                    ? widget.card.color.withValues(alpha: 0.12)
-                    : Colors.black.withValues(alpha: 0.04),
-                blurRadius: _hovered ? 16 : 6,
-                offset: const Offset(0, 4),
-              ),
-            ],
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        decoration: BoxDecoration(
+          color: _kSurface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: _hovered
+                ? widget.card.color.withValues(alpha: 0.4)
+                : _kBorder,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: widget.card.color.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(widget.card.icon, color: widget.card.color, size: 24),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                widget.card.label,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: _kTextDark,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                widget.card.description,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: _kTextLight,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
+          boxShadow: [
+            BoxShadow(
+              color: _hovered
+                  ? widget.card.color.withValues(alpha: 0.12)
+                  : Colors.black.withValues(alpha: 0.04),
+              blurRadius: _hovered ? 16 : 6,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            onTap: widget.onOpen,
+            borderRadius: BorderRadius.circular(14),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: widget.card.color.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(widget.card.icon, color: widget.card.color, size: 24),
+                  ),
+                  const SizedBox(height: 14),
                   Text(
-                    'Acessar',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: widget.card.color,
+                    widget.card.label,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: _kTextDark,
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 14,
-                    color: widget.card.color,
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.card.description,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: _kTextLight,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Text(
+                        'Acessar',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: widget.card.color,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 14,
+                        color: widget.card.color,
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
